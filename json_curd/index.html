@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>json curd</title>
+</head>
+<body>
+<script>
+    function Json() {
+
+    }
+
+    Json.prototype.get = function (obj, key) {
+        var args = this.get.arguments;
+        var result = obj;
+        for (var i = 1; i < args.length; i++) {
+            console.log(i,args[i])
+            result = result[args[i]]
+            if (result === undefined) {
+                return false
+            }
+        }
+        return result
+    }
+
+    var data = {
+        OK: 200,
+        FAIL: 500,
+        ENTRY: {
+            FA_TOKEN_INVALID: 1001,
+            FA_TOKEN_EXPIRE: 1002,
+            FA_USER_NOT_EXIST: 1003
+        },
+        GATE: {
+            FA_NO_SERVER_AVAILABLE: 2001
+        },
+        CHAT: {
+            FA_CHANNEL_CREATE: 3001,
+            FA_CHANNEL_NOT_EXIST: 3002,
+            FA_UNKNOWN_CONNECTOR: 3003,
+            FA_USER_NOT_ONLINE: 3004
+        }
+    };
+    var json = new Json()
+//    console.log(json.get(data, "OK"));
+</script>
+</body>
+</html>
