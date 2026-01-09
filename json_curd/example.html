@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>CodeLib 使用示例</title>
+    <style>
+        body { font-family: Monaco, monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+        h2 { color: #569cd6; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .success { color: #4ec9b0; }
+        .error { color: #f14c4c; }
+        .warn { color: #dcdcaa; }
+        pre { background: #2d2d2d; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .section { margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <h1>CodeLib 使用示例</h1>
+    <div id="output"></div>
+
+    <script src="code.js"></script>
+    <script>
+        var output = document.getElementById('output');
+
+        function log(title, content, type) {
+            var colorClass = type || '';
+            output.innerHTML += '<div class="section"><h2>' + title + '</h2><pre class="' + colorClass + '">' + content + '</pre></div>';
+        }
+
+        // ============================================
+        // 示例 1: HTTP 状态码判断
+        // ============================================
+        (function () {
+            var checker = CodeLib.checker;
+            var results = [];
+
+            results.push('// 判断 HTTP 200');
+            results.push('checker.isHttpSuccess(200) = ' + checker.isHttpSuccess(200));
+
+            results.push('\n// 判断 HTTP 404');
+            results.push('checker.isHttpClientError(404) = ' + checker.isHttpClientError(404));
+            results.push('checker.getHttpMessage(404) = "' + checker.getHttpMessage(404) + '"');
+
+            results.push('\n// 判断 HTTP 500');
+            results.push('checker.isHttpServerError(500) = ' + checker.isHttpServerError(500));
+            results.push('checker.getHttpMessage(500) = "' + checker.getHttpMessage(500) + '"');
+
+            results.push('\n// 判断是否需要登录');
+            results.push('checker.isUnauthorized(401) = ' + checker.isUnauthorized(401));
+
+            log('示例 1: HTTP 状态码判断', results.join('\n'), 'success');
+        })();
+
+        // ============================================
+        // 示例 2: 业务错误码判断
+        // ============================================
+        (function () {
+            var checker = CodeLib.checker;
+            var BizCode = CodeLib.BizCode;
+            var results = [];
+
+            results.push('// 判断业务成功');
+            results.push('checker.isBizSuccess(0) = ' + checker.isBizSuccess(0));
+
+            results.push('\n// Token 过期错误');
+            results.push('BizCode.ENTRY.TOKEN_EXPIRE = ' + BizCode.ENTRY.TOKEN_EXPIRE);
+            results.push('checker.isAuthError(1002) = ' + checker.isAuthError(1002));
+            results.push('checker.needReLogin(1002) = ' + checker.needReLogin(1002));
+            results.push('checker.getBizMessage(1002) = "' + checker.getBizMessage(1002) + '"');
+
+            results.push('\n// 聊天模块错误');
+            results.push('BizCode.CHAT.USER_NOT_ONLINE = ' + BizCode.CHAT.USER_NOT_ONLINE);
+            results.push('checker.isChatError(3004) = ' + checker.isChatError(3004));
+            results.push('checker.getBizMessage(3004) = "' + checker.getBizMessage(3004) + '"');
+
+            log('示例 2: 业务错误码判断', results.join('\n'), 'success');
+        })();
+
+        // ============================================
+        // 示例 3: 处理成功响应
+        // ============================================
+        (function () {
+            var checker = CodeLib.checker;
+            var results = [];
+
+            // 模拟成功的 API 响应
+            var httpStatus = 200;
+            var apiResponse = {
+                code: 0,
+                message: '获取用户信息成功',
+                data: { id: 1, name: '张三', email: 'zhangsan@example.com' }
+            };
+
+            results.push('// 模拟 API 响应');
+            results.push('httpStatus = ' + httpStatus);
+            results.push('apiResponse = ' + JSON.stringify(apiResponse, null, 2));
+
+            var result = checker.handleResponse(httpStatus, apiResponse);
+            results.push('\n// 处理结果');
+            results.push('result = ' + JSON.stringify(result, null, 2));
+
+            log('示例 3: 处理成功响应', results.join('\n'), 'success');
+        })();
+
+        // ============================================
+        // 示例 4: 处理业务错误
+        // ============================================
+        (function () {
+            var checker = CodeLib.checker;
+            var results = [];
+
+            // 模拟 Token 过期的响应
+            var httpStatus = 200;
+            var apiResponse = {
+                code: 1002,
+                message: 'Token已过期',
+                data: null
+            };
+
+            results.push('// 模拟 Token 过期响应');
+            results.push('httpStatus = ' + httpStatus);
+            results.push('apiResponse = ' + JSON.stringify(apiResponse, null, 2));
+
+            var result = checker.handleResponse(httpStatus, apiResponse);
+            results.push('\n// 处理结果');
+            results.push('result = ' + JSON.stringify(result, null, 2));
+            results.push('\n// 需要重新登录: ' + result.needLogin);
+
+            log('示例 4: 处理业务错误 (Token过期)', results.join('\n'), 'error');
+        })();
+
+        // ============================================
+        // 示例 5: 处理 HTTP 错误
+        // ============================================
+        (function () {
+            var checker = CodeLib.checker;
+            var results = [];
+
+            // 模拟服务器错误
+            var httpStatus = 500;
+            var apiResponse = null;
+
+            results.push('// 模拟服务器 500 错误');
+            results.push('httpStatus = ' + httpStatus);
+            results.push('apiResponse = null');
+
+            var result = checker.handleResponse(httpStatus, apiResponse);
+            results.push('\n// 处理结果');
+            results.push('result = ' + JSON.stringify(result, null, 2));
+
+            log('示例 5: 处理 HTTP 错误 (500)', results.join('\n'), 'error');
+        })();
+
+        // ============================================
+        // 示例 6: 创建响应
+        // ============================================
+        (function () {
+            var checker = CodeLib.checker;
+            var BizCode = CodeLib.BizCode;
+            var results = [];
+
+            // 创建成功响应
+            var successResp = checker.success({ userId: 123 }, '登录成功');
+            results.push('// 创建成功响应');
+            results.push('checker.success({ userId: 123 }, "登录成功")');
+            results.push('= ' + JSON.stringify(successResp, null, 2));
+
+            // 创建失败响应
+            var failResp = checker.fail(BizCode.ENTRY.PASSWORD_ERROR);
+            results.push('\n// 创建失败响应');
+            results.push('checker.fail(BizCode.ENTRY.PASSWORD_ERROR)');
+            results.push('= ' + JSON.stringify(failResp, null, 2));
+
+            log('示例 6: 创建响应', results.join('\n'), 'warn');
+        })();
+
+        // ============================================
+        // 示例 7: 实际应用 - 封装 fetch 请求
+        // ============================================
+        (function () {
+            var code = `
+// 封装 fetch 请求
+async function request(url, options) {
+    var checker = CodeLib.checker;
+
+    try {
+        var response = await fetch(url, options);
+        var data = await response.json();
+
+        var result = checker.handleResponse(response.status, data);
+
+        if (result.needLogin) {
+            // 跳转登录页
+            window.location.href = '/login';
+            return;
+        }
+
+        if (!result.success) {
+            // 显示错误提示
+            alert(result.message);
+            return null;
+        }
+
+        return result.data;
+
+    } catch (error) {
+        alert('网络请求失败');
+        return null;
+    }
+}
+
+// 使用示例
+async function getUserInfo() {
+    var user = await request('/api/user/info');
+    if (user) {
+        console.log('用户信息:', user);
+    }
+}`;
+
+            log('示例 7: 实际应用 - 封装 fetch 请求', code, 'warn');
+        })();
+
+    </script>
+</body>
+</html>
