@@ -1,0 +1,44 @@
+name: Build Flutter Push Validation APKs
+
+on:
+  push:
+    branches:
+      - chatgpt/flutter-push-validation-20260828
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.1'
+          channel: stable
+          cache: true
+
+      - name: Flutter doctor
+        run: flutter doctor -v
+
+      - name: Build A and B
+        run: bash flutter_push_validation/build.sh
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-push-validation-apks
+          path: |
+            flutter_push_validation/dist/push_app_a-release.apk
+            flutter_push_validation/dist/push_app_b-release.apk
+          if-no-files-found: error
+          retention-days: 7
